@@ -9,15 +9,21 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    addexercises.cpp \
+    addfood.cpp \
     main.cpp \
     mainwindow.cpp \
     premier.cpp
 
 HEADERS += \
+    addexercises.h \
+    addfood.h \
     mainwindow.h \
     premier.h
 
 FORMS += \
+    addexercises.ui \
+    addfood.ui \
     mainwindow.ui \
     premier.ui
 

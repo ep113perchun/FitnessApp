@@ -80,7 +80,7 @@
        <widget class="QLineEdit" name="lineEdit"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="seatchB">
         <property name="text">
          <string>Поиск</string>
         </property>

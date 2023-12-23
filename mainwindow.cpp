@@ -31,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     saveSettings();
-    db.close();
     delete ui;
 }
 
@@ -67,6 +66,7 @@ void MainWindow::on_logIn_clicked()
 
         if (query.exec() && query.next()) {
             Premier premier;
+            premier.key = query.value(0).toInt();
             premier.setModal(true);
             premier.exec();
         } else {
