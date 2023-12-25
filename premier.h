@@ -37,6 +37,10 @@ private slots:
 
     void on_seatchB_clicked();
 
+    void on_listWidget_2_itemChanged(QListWidgetItem *item);
+
+    void on_deleteButton_clicked();
+
 private:
     Ui::Premier *ui;
     QTimer *Timer;

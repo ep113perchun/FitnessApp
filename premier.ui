@@ -125,6 +125,19 @@
     </item>
    </layout>
   </widget>
+  <widget class="QPushButton" name="deleteButton">
+   <property name="geometry">
+    <rect>
+     <x>620</x>
+     <y>470</y>
+     <width>251</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Удалить выполненные</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

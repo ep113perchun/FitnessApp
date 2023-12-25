@@ -93,7 +93,7 @@ void Premier::updateTaskList_2(const QString &currentQuery, QString str)
         while (query.next()) {
             QString dish = query.value(0).toString();
             int calories = query.value(1).toInt();
-            bool status = query.value(3).toBool();
+            bool status = query.value(2).toBool();
 
             // Создаем строку с данными и добавляем ее в список
             QString itemStr = QString("%1 | %2").arg(dish).arg(calories);
@@ -101,6 +101,7 @@ void Premier::updateTaskList_2(const QString &currentQuery, QString str)
             // Создаем элемент списка с проверкой в зависимости от статуса и добавляем его в виджет
             QListWidgetItem* listItem = new QListWidgetItem(itemStr);
             listItem->setFlags(listItem->flags() | Qt::ItemIsUserCheckable);
+//            qDebug() << status;
             listItem->setCheckState(status ? Qt::Checked : Qt::Unchecked);
 
             ui->listWidget_2->addItem(listItem);
@@ -146,9 +147,86 @@ void Premier::on_addFood_clicked()
 
 void Premier::on_listWidget_itemChanged(QListWidgetItem *item)
 {
+    QString exercises = item->text();
+    QStringList parts = exercises.split(" | ");
+    QString firstWord = parts.at(0);
+
+    bool status = false;
+
+    QSqlQuery query;
+    query.prepare("SELECT status FROM trainings WHERE training_date = :date AND exercises = :exercises");
+    query.bindValue(":date", date);
+    query.bindValue(":exercises", firstWord);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to execute query";
+        return;
+    }
+
+    while (query.next()) {
+        status = query.value(0).toBool();
+    }
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (db.isValid()) {
+        QSqlQuery query(db);
+        query.prepare("UPDATE trainings SET status = :status WHERE exercises = :exercises AND training_date = :date");
+        query.bindValue(":exercises", firstWord);
+        query.bindValue(":status", !status);
+        query.bindValue(":date", date);
+
+        if (query.exec()) {
+            qDebug() << "Статус тренировки " << !status << " успешно обновлен.";
+        } else {
+            qDebug() << "Ошибка обновления статуса тренировки" << query.lastError().text();
+        }
+    } else {
+        qDebug() << "Невозможно получить доступ к базе данных.";
+    }
 
 }
 
+void Premier::on_listWidget_2_itemChanged(QListWidgetItem *item)
+{
+    QString dish = item->text();
+    QStringList parts = dish.split(" | ");
+    QString firstWord = parts.at(0);
+
+    bool status = false;
+
+    QSqlQuery query;
+    query.prepare("SELECT status FROM eat WHERE eat_date = :date AND dish = :dish");
+    query.bindValue(":date", date);
+    query.bindValue(":dish", firstWord);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to execute query";
+        return;
+    }
+
+    while (query.next()) {
+        status = query.value(0).toBool();
+    }
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (db.isValid()) {
+        QSqlQuery query(db);
+        // Формируем и выполняем SQL-запрос
+        query.prepare("UPDATE eat SET status = :status WHERE dish = :dish AND eat_date = :date");
+        query.bindValue(":dish", firstWord);
+        query.bindValue(":status", !status);
+        query.bindValue(":date", date);
+        if (query.exec()) {
+        // Запрос выполнен успешно
+            qDebug() << "Статус еды " << firstWord << " " << status << " успешно обновлен.";
+        } else {
+        // Обработка ошибки запроса
+            qDebug() << "Ошибка обновления статуса еды" << query.lastError().text();
+        }
+    } else {
+        qDebug() << "Невозможно получить доступ к базе данных.";
+    }
+}
 
 void Premier::on_seatchB_clicked()
 {
@@ -158,9 +236,26 @@ void Premier::on_seatchB_clicked()
 }
 
 
-void Premier::on_pushButton_2_clicked()
+
+
+void Premier::on_deleteButton_clicked()
 {
     QSqlQuery query;
-    query.prepare("");
+    query.prepare("DELETE FROM trainings WHERE status = TRUE AND training_date = :date");
+    query.bindValue(":date", date);
+    if(query.exec()) {
+        updateTaskList("SELECT exercises, approaches, repetitions, status FROM trainings WHERE training_date = :date", NULL);
+    } else {
+        qDebug() << "Ошибка удаления" << query.lastError().text();
+    }
+
+    QSqlQuery query2;
+        query.prepare("DELETE FROM eat WHERE status = TRUE AND eat_date = :date");
+    query2.bindValue(":date", date);
+    if(query2.exec()) {
+        updateTaskList_2("SELECT dish, calories, status FROM eat WHERE eat_date = :date", NULL);
+    } else {
+        qDebug() << "Ошибка удаления 2" << query2.lastError().text();
+    }
 }
 
