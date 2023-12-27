@@ -39,12 +39,26 @@ private slots:
 
     void on_listWidget_2_itemChanged(QListWidgetItem *item);
 
-    void on_deleteButton_clicked();
+    void markDate(QDate &date);
+
+    void unMarkDate(QDate &date);
+
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_5_clicked();
+
+    void on_pushButton_clicked();
+
+    void updateElapsedTime();
 
 private:
     Ui::Premier *ui;
     QTimer *Timer;
+    QTimer timer;
     QSqlDatabase db;
+
+    int elapsedSeconds;
+    int elapsedMinuts;
 };
 
 #endif // PREMIER_H

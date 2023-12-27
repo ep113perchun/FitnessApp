@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>608</width>
     <height>300</height>
    </rect>
   </property>
@@ -16,9 +16,22 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_4">
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QLabel" name="label_3">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="box">
       <property name="title">
-       <string>Авторизация</string>
+       <string/>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -54,6 +67,13 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>IMG</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="logIn">
              <property name="text">
               <string>Войти</string>
@@ -81,12 +101,41 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
-     <height>24</height>
+     <width>608</width>
+     <height>43</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <widget class="QMenu" name="menu_2">
+     <property name="title">
+      <string>Регистрация</string>
+     </property>
+    </widget>
+    <addaction name="menu_2"/>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+   </widget>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_2">
+   <property name="text">
+    <string>Дневник</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Добавление</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>Новому пользователю, для того чтобы зарегистрироваться требуется придумать имя пользователя и пароль, после чего их нужно ввести в поля с соответствующими названиями и нажать на кнопку зарегистрироваться, после этого если нажать на кнопку Войти, у пользователя будет доступ к дневнику</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

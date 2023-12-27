@@ -1,0 +1,20 @@
+QPushButton{
+    border-radius: 2%;
+    background-color: rgb(55, 122, 242);
+    color: white;
+    border: 2px solid rgb(237, 96, 59);
+}
+
+QLabel#zag {
+    font-style: italic;
+    background-color: rgb(42, 70, 68);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size:15px;
+}
+
+QListWidget {
+    border: 2px solid rgb(247, 206, 84);
+    border-radius: 3%;
+}

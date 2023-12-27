@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+
 AddFood::AddFood(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddFood)
@@ -33,7 +34,7 @@ void AddFood::on_saveButton_clicked()
     QString dish = ui->dish->text();
     QString calories = ui->calories->text();
     int account_id = key;
-    bool status = true;
+    bool status = false;
 
     QSqlQuery query;
     query.prepare("INSERT INTO eat (account_id, dish, calories, eat_date, status) VALUES (:account_id, :dish, :calories, :eat_date, :status)");
@@ -50,5 +51,7 @@ void AddFood::on_saveButton_clicked()
     } else {
         qDebug() << "Ошибка при добавлении записи в базу данных:" << query.lastError().text();
     }
+
+    AddFood::close();
 }
 

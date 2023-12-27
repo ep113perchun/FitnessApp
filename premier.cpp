@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <QDesktopServices>
+#include <QUrl>
+
 
 Premier::Premier(QWidget *parent) :
     QDialog(parent),
@@ -16,6 +19,11 @@ Premier::Premier(QWidget *parent) :
     connect(Timer, SIGNAL(timeout()), this, SLOT(Timer_TimeOut_Event_Slot()));
     Timer->setInterval(1000);
     Timer->start();
+
+    elapsedSeconds = 0;
+    elapsedMinuts = 0;
+    connect(&timer, &QTimer::timeout, this, &Premier::updateElapsedTime);
+    timer.start(1000);
 
     db = QSqlDatabase::addDatabase("QPSQL");
     db.setDatabaseName("ExerciseAndDiet");
@@ -40,31 +48,26 @@ Premier::~Premier()
 
 void Premier::updateTaskList(const QString &currentQuery, QString str)
 {
-        ui->listWidget->clear(); // Очищаем виджет перед обновлением
+        ui->listWidget->clear();
 
-        // Выполняем запрос к базе данных, чтобы получить записи для заданной даты
         QSqlQuery query;
         query.prepare(currentQuery);
         query.bindValue(":date", date);
         query.bindValue(":str", str);
 
         if (!query.exec()) {
-            // Обработка ошибки запроса к базе данных
             qDebug() << "Failed to execute query";
             return;
         }
 
-        // Обрабатываем результаты запроса
         while (query.next()) {
             QString exercises = query.value(0).toString();
             int approaches = query.value(1).toInt();
             int repetitions = query.value(2).toInt();
             bool status = query.value(3).toBool();
 
-            // Создаем строку с данными и добавляем ее в список
-            QString itemStr = QString("%1 | %2 | %3").arg(exercises).arg(approaches).arg(repetitions);
+            QString itemStr = QString("%1 | %2 x %3").arg(exercises).arg(approaches).arg(repetitions);
 
-            // Создаем элемент списка с проверкой в зависимости от статуса и добавляем его в виджет
             QListWidgetItem* listItem = new QListWidgetItem(itemStr);
             listItem->setFlags(listItem->flags() | Qt::ItemIsUserCheckable);
             listItem->setCheckState(status ? Qt::Checked : Qt::Unchecked);
@@ -75,33 +78,27 @@ void Premier::updateTaskList(const QString &currentQuery, QString str)
 
 void Premier::updateTaskList_2(const QString &currentQuery, QString str)
 {
-        ui->listWidget_2->clear(); // Очищаем виджет перед обновлением
+        ui->listWidget_2->clear();
 
-        // Выполняем запрос к базе данных, чтобы получить записи для заданной даты
         QSqlQuery query;
         query.prepare(currentQuery);
         query.bindValue(":date", date);
         query.bindValue(":str", str);
 
         if (!query.exec()) {
-            // Обработка ошибки запроса к базе данных
             qDebug() << "Failed to execute query";
             return;
         }
 
-        // Обрабатываем результаты запроса
         while (query.next()) {
             QString dish = query.value(0).toString();
             int calories = query.value(1).toInt();
             bool status = query.value(2).toBool();
 
-            // Создаем строку с данными и добавляем ее в список
-            QString itemStr = QString("%1 | %2").arg(dish).arg(calories);
+            QString itemStr = QString("%1 | %2 ccal").arg(dish).arg(calories);
 
-            // Создаем элемент списка с проверкой в зависимости от статуса и добавляем его в виджет
             QListWidgetItem* listItem = new QListWidgetItem(itemStr);
             listItem->setFlags(listItem->flags() | Qt::ItemIsUserCheckable);
-//            qDebug() << status;
             listItem->setCheckState(status ? Qt::Checked : Qt::Unchecked);
 
             ui->listWidget_2->addItem(listItem);
@@ -132,6 +129,8 @@ void Premier::on_addExercise_clicked()
     addExercises.date = this->date;
     addExercises.setModal(true);
     addExercises.exec();
+    updateTaskList("SELECT exercises, approaches, repetitions, status FROM trainings WHERE training_date = :date", NULL);
+    markDate(date);
 }
 
 
@@ -142,6 +141,8 @@ void Premier::on_addFood_clicked()
     addFood.date = this->date;
     addFood.setModal(true);
     addFood.exec();
+    updateTaskList_2("SELECT dish, calories, status FROM eat WHERE eat_date = :date", NULL);
+    markDate(date);
 }
 
 
@@ -235,10 +236,24 @@ void Premier::on_seatchB_clicked()
     updateTaskList_2("SELECT dish, calories, status FROM eat WHERE eat_date = :date AND dish LIKE :str", str);
 }
 
+void Premier::markDate(QDate &date) {
+    QTextCharFormat format;
+    format.setFontWeight(QFont::ExtraBold);
+    format.setFontUnderline(true);
+
+    ui->calendarWidget->setDateTextFormat(date, format);
+}
+
+void Premier::unMarkDate(QDate &date) {
+    QTextCharFormat format;
+    format.setFontWeight(QFont::Normal);
+    format.setFontUnderline(false);
+
+    ui->calendarWidget->setDateTextFormat(date, format);
+}
 
 
-
-void Premier::on_deleteButton_clicked()
+void Premier::on_pushButton_2_clicked()
 {
     QSqlQuery query;
     query.prepare("DELETE FROM trainings WHERE status = TRUE AND training_date = :date");
@@ -248,14 +263,37 @@ void Premier::on_deleteButton_clicked()
     } else {
         qDebug() << "Ошибка удаления" << query.lastError().text();
     }
+}
 
-    QSqlQuery query2;
-        query.prepare("DELETE FROM eat WHERE status = TRUE AND eat_date = :date");
-    query2.bindValue(":date", date);
-    if(query2.exec()) {
+
+void Premier::on_pushButton_5_clicked()
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM eat WHERE status = TRUE AND eat_date = :date");
+    query.bindValue(":date", date);
+    if(query.exec()) {
         updateTaskList_2("SELECT dish, calories, status FROM eat WHERE eat_date = :date", NULL);
     } else {
-        qDebug() << "Ошибка удаления 2" << query2.lastError().text();
+        qDebug() << "Ошибка удаления 2" << query.lastError().text();
     }
+    unMarkDate(date);
+}
+
+
+void Premier::on_pushButton_clicked()
+{
+    QUrl link("https://github.com/ep113perchun/FitnessApp");
+    QDesktopServices::openUrl(link);
+
+}
+
+void Premier::updateElapsedTime()
+{
+    elapsedSeconds++;
+    if (elapsedSeconds == 60) {
+        elapsedSeconds = 0;
+        elapsedMinuts++;
+    }
+    ui->label->setText("Минут: " + QString::number(elapsedMinuts) + " Секунд: " + QString::number(elapsedSeconds));
 }
 

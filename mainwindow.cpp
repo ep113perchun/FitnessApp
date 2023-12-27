@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -57,24 +58,29 @@ void MainWindow::on_logIn_clicked()
 {
     QString login = ui->login->text();
     QString password = ui->password->text();
+    if (ui->login->text() == "" || ui->password->text() == "")
+    {
+        QMessageBox::warning(this, "Error", "Заполните все поля!");
+        return;
+    }else{
+        if (db.open()) {
+            QSqlQuery query;
+            query.prepare("SELECT id FROM account WHERE login = :login AND pass = :pass");
+            query.bindValue(":login", login);
+            query.bindValue(":pass", password);
 
-    if (db.open()) {
-        QSqlQuery query;
-        query.prepare("SELECT id FROM account WHERE login = :login AND pass = :pass");
-        query.bindValue(":login", login);
-        query.bindValue(":pass", password);
+            if (query.exec() && query.next()) {
+                Premier premier;
+                premier.key = query.value(0).toInt();
+                premier.setModal(true);
+                premier.exec();
+            } else {
+                ui->statusbar->showMessage("Неправильный логин или пароль");
+            }
 
-        if (query.exec() && query.next()) {
-            Premier premier;
-            premier.key = query.value(0).toInt();
-            premier.setModal(true);
-            premier.exec();
         } else {
-            ui->statusbar->showMessage("Неправильный логин или пароль");
+            ui->statusbar->showMessage("Ошибка при открытии базы данных: " + db.lastError().text());
         }
-
-    } else {
-        ui->statusbar->showMessage("Ошибка при открытии базы данных: " + db.lastError().text());
     }
 }
 
@@ -83,19 +89,34 @@ void MainWindow::on_logUp_clicked()
 {
     QString login = ui->login->text();
     QString password = ui->password->text();
-    if (db.open()) {
-        QSqlQuery query;
-        query.prepare("INSERT INTO account (login, pass) VALUES (:login, :pass)");
-        query.bindValue(":login", login);
-        query.bindValue(":pass", password);
+    if (ui->login->text() == "" || ui->password->text() == "")
+    {
+        QMessageBox::warning(this, "Error", "Заполните все поля!");
+        return;
+    }else{
+        if (db.open()) {
+            QSqlQuery query;
+            query.prepare("INSERT INTO account (login, pass) VALUES (:login, :pass)");
+            query.bindValue(":login", login);
+            query.bindValue(":pass", password);
 
-        if (query.exec()) {
-            ui->statusbar->showMessage("Вы успешно авторизовались");
+            if (query.exec()) {
+                ui->statusbar->showMessage("Вы успешно авторизовались");
+            } else {
+                ui->statusbar->showMessage("Ошибка при добавлении записи: " + query.lastError().text());
+            }
         } else {
-            ui->statusbar->showMessage("Ошибка при добавлении записи: " + query.lastError().text());
+            ui->statusbar->showMessage("Ошибка при открытии базы данных: " + db.lastError().text());
         }
-    } else {
-        ui->statusbar->showMessage("Ошибка при открытии базы данных: " + db.lastError().text());
     }
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(nullptr, "Выберите изображение",
+    QDir::currentPath(), "*.png *.jpg *.gif *.jpeg");
+    QImage image1(filename);
+    ui->label_3->setPixmap(QPixmap::fromImage(image1));
 }
 

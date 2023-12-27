@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <regex>
 
 AddExercises::AddExercises(QWidget *parent) :
     QDialog(parent),
@@ -34,7 +35,7 @@ void AddExercises::on_saveButton2_clicked()
     QString approaches = ui->approaches->text();
     QString repetitions = ui->repetitions->text();
     int account_id = key;
-    bool status = true;
+    bool status = false;
 
     QSqlQuery query;
     query.prepare("INSERT INTO trainings (account_id, exercises, approaches, repetitions, training_date, status) VALUES (:account_id, :exercises, :approaches, :repetitions, :training_date, :status)");
@@ -45,13 +46,12 @@ void AddExercises::on_saveButton2_clicked()
     query.bindValue(":training_date", date);
     query.bindValue(":status", status);
 
-    qDebug() << "date" << date.toString("dd.MM.yyyy");
-
     if(query.exec()) {
         qDebug() << "Запись успешно добавлена в базу данных!";
     } else {
         qDebug() << "Ошибка при добавлении записи в базу данных:" << query.lastError().text();
     }
 
+    AddExercises::close();
 }
 
